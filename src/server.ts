@@ -18,11 +18,12 @@ export  const launchServer = () => {
 
     app.get('/query1', async (req, res) => {
         const result = await Movie.find(
-            {$expr: { $gt: ['$imdb.rating', '$tomatoes.viewer.rating'] }})
+            {$expr: { $lt: ['$imdb.rating', '$tomatoes.viewer.rating'] }})
             .select('title year -_id').limit(10)
         ;
 
         res.json(result);
+        // res.type('application/json').json(result);//cw
     });
 
     app.get('/query2', async (req, res) => {
@@ -47,6 +48,16 @@ export  const launchServer = () => {
         res.json(result);
     });
 
+
+
+    app.get('/query5', async (req, res) => {
+        const result = await Movie.aggregate([
+            { $match: { year: 2010 } },
+            { $group: {_id: "$imdb.rating", titles: { $push: "$title" }}},
+            { $sort: { _id: -1 } }
+        ])
+        res.json(result);
+    });
 
 
 }
