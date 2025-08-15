@@ -19,9 +19,10 @@ export const launchServer = () => {
     app.use(morgan("dev"));
     // ===========
     app.get('/query1', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const result = yield Movie.find({ $expr: { $gt: ['$imdb.rating', '$tomatoes.viewer.rating'] } })
+        const result = yield Movie.find({ $expr: { $lt: ['$imdb.rating', '$tomatoes.viewer.rating'] } })
             .select('title year -_id').limit(10);
         res.json(result);
+        // res.type('application/json').json(result);//cw
     }));
     app.get('/query2', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield Movie.find({ languages: ['Russian'] })
@@ -40,6 +41,14 @@ export const launchServer = () => {
             .sort({ 'awards.wins': -1 })
             .limit(2)
             .select('title awards.wins -_id');
+        res.json(result);
+    }));
+    app.get('/query5', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const result = yield Movie.aggregate([
+            { $match: { year: 2010 } },
+            { $group: { _id: "$imdb.rating", titles: { $push: "$title" } } },
+            { $sort: { _id: -1 } }
+        ]);
         res.json(result);
     }));
 };
